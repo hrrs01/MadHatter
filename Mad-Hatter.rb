@@ -237,7 +237,7 @@ class MadHatter
 		#p a, b
 		#arr = a.scan(/#{b}/)
 		#p arr
-		@stack<< b.scan(/#{a}/)[0]
+		@stack<< a.scan(/#{b}/)[0]
 	end
 	
 	# Very useful for fake arrays
@@ -253,9 +253,9 @@ class MadHatter
 	
 	# Also very useful
 	def string_split
-		a = @stack.pop.to_s || "\s"
-		b = @stack.pop.to_s 
-		b.split(/#{a}/).each{|x|
+		a = @stack.pop.to_s 
+		b = @stack.pop.to_s || "\s"
+		a.split(/#{b}/).each{|x|
 			@stack<< x
 		}
 		
