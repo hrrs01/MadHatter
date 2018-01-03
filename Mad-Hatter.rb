@@ -5,7 +5,7 @@ class MadHatter
 		@grid = []
 		@grid_length = 0
 		@stack = []
-		
+		@buffer = ""
 		@commands = {
 			"t"=>Proc.new{
 				mult_by_10()
@@ -61,8 +61,29 @@ class MadHatter
 			"o"=>Proc.new{
 				output()
 			},
-			"n"=>Proc.new{
+			"\\"=>Proc.new{
 				newline()
+			},
+			"|"=>Proc.new{
+				noop()
+			},
+			"n"=>Proc.new{
+				char_to_int()
+			},
+			"N"=>Proc.new{
+				string_to_int()
+			},
+			"l"=>Proc.new{
+				string_length()
+			},
+			"R"=>Proc.new{
+				string_regex()
+			},
+			"C"=>Proc.new{
+				string_chars()
+			},
+			"D"=>Proc.new{
+				debug()
 			}
 			
 		}
@@ -77,7 +98,7 @@ class MadHatter
 	def setup src
 		code = File.open(src, "r").read
 		code.each_line{|x|
-			@grid<< x
+			@grid<< x.chars
 		}
 		@grid_length = @grid.max_by(&:length).length
 		@grid.each_with_index{|x,i|
@@ -91,22 +112,20 @@ class MadHatter
 ###Numbers###
 #############
 
-	# Easier numbers if strings become supported
-	def chars_to_ord
-		a=1
-		a=@stack.pop if @stack[-1] =~ /[[:digit:]]/
-		chars = []
-		a.times{|x|
-			chars<< @stack.pop.ord
-		}
+	def char_to_int
+		a = @stack.pop|| 0
+		
+		@stack<< a.to_s[0].ord
+	
+	end
+	
+	
+	def string_to_int
+		a = @stack.pop || 0
+		
+		@stack<< a.to_i
 	end
 
-	def string_to_num
-		@stack<< @stack.pop.to_i if @stack[-1] =~ /[[:digit:]]+/
-	end
-	
-	# end of if string
-	
 	def mult_by_10
 		a = 10
 		b = @stack.pop || 1
@@ -168,8 +187,33 @@ class MadHatter
 	end
 	
 #############
-###Strings### - May, or may not be added
+###Strings###
 #############
+
+	# Most useful here probably
+	def string_length
+		a = @stack.pop
+		@stack<< a.to_s.length
+	end
+	
+	# Hacky
+	def string_regex
+		a = @stack.pop.to_s
+		b = @stack.pop.to_s
+		
+		@stack<< a.scan(/#{b}/)[0]
+	end
+	
+	# Very useful for fake arrays
+	def string_chars
+		a = @stack.pop.to_s
+		a.chars.each{|x|
+	
+	
+			@stack<< x
+		}
+	
+	end
 
 #############
 ####Stack####
@@ -206,9 +250,9 @@ class MadHatter
 #############
 
 	def jump
-		a = @stack.pop || 0
+		a = @stack.pop || -1
 		b = @stack.pop || 0
-		@ip[:x] = a
+		@ip[:x] = a-1
 		@ip[:y] = b
 	end
 	
@@ -227,10 +271,11 @@ class MadHatter
 ##################
 
 	def input
+		x = gets.chomp
 		begin
-			@stack<< gets.chomp.to_i
+			@stack<< x.to_i
 		rescue
-			@stack<< -1
+			@stack<< x
 		end
 	end
 	
@@ -247,17 +292,34 @@ class MadHatter
 #############
 ###Running###
 #############
+	
+	def debug
+		print @stack,$/, @grid,$/, @ip
+	
+	end
+	
 	def move
 			#print @ip
+			#print @oldPos
 			@ip[:x] += 1
 			#@stack<< 0 if @stack.length<1
 			#puts @stack
 			if @ip[:x] > @grid_length-1
-				@ip[:y] += 1 if @stack[-1]==nil || @stack[-1] > 0
-				@ip[:y] -= 1 if @stack[-1] && @stack[-1] <= 0
+				value = 0
+				begin
+					value = @stack[-1].to_i
+				rescue
+					value = @stack[-1].length
+				end
+				
+				@ip[:y] += 1 if @stack[-1]==nil || value > 0
+				@ip[:y] -= 1 if @stack[-1] && value <= 0
 				@ip[:x] = 0
 				@running = false if @ip[:y] > @grid.length-1 ||  @ip[:y]<0
+			
 			end
+			
+			#print @ip
 			
 	end
 
@@ -268,10 +330,24 @@ class MadHatter
 			
 			move()
 			break if @running == false
+			break if @grid == nil
 			if @commands.key? @grid[@ip[:y]][@ip[:x]]
 				@commands[@grid[@ip[:y]][@ip[:x]]].call()
+				
+			# Number handeling
 			elsif @grid[@ip[:y]][@ip[:x]] =~ /[[:digit:]]/
 				@stack<< @grid[@ip[:y]][@ip[:x]].to_i
+			# String handeling
+			elsif @grid[@ip[:y]][@ip[:x]] == "'"
+				@buffer = ""
+				move()
+				while @grid[@ip[:y]][@ip[:x]] != "'"
+					
+					@buffer<< @grid[@ip[:y]][@ip[:x]]
+					move()
+					
+				end
+				@stack<< @buffer
 			end
 		end
 	end
