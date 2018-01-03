@@ -4,7 +4,9 @@ class MadHatter
 		@ip = {"x": -1, "y": 0}
 		@grid = []
 		@grid_length = 0
-		@stack = []
+		@stack = [[]]
+		@stack_index = 0
+		
 		@buffer = ""
 		@commands = {
 			"t"=>Proc.new{
@@ -73,7 +75,7 @@ class MadHatter
 			"N"=>Proc.new{
 				string_to_int()
 			},
-			"l"=>Proc.new{
+			"L"=>Proc.new{
 				string_length()
 			},
 			"R"=>Proc.new{
@@ -108,6 +110,24 @@ class MadHatter
 			},
 			"E"=>Proc.new{
 				string_empty
+			},
+			"{"=>Proc.new{
+				stack_left
+			},
+			"}"=>Proc.new{
+				stack_right
+			},
+			"p"=>Proc.new{
+				push_right
+			},
+			"q"=>Proc.new{
+				push_left
+			},
+			"Z"=>Proc.new{
+				string_reverse
+			},
+			"X"=>Proc.new{
+				string_from_int
 			}
 			
 			
@@ -147,77 +167,76 @@ class MadHatter
 #############
 
 	def char_to_int
-		a = @stack.pop|| 0
+		a = @stack[@stack_index].pop|| 0
 		
-		@stack<< a.to_s[0].ord
+		@stack[@stack_index]<< a.to_s[0].ord
 	
 	end
 	
-	
 	def string_to_int
-		a = @stack.pop || 0
+		a = @stack[@stack_index].pop || 0
 		
-		@stack<< a.to_i
+		@stack[@stack_index]<< a.to_i
 	end
 
 	def mult_by_10
 		a = 10
-		b = @stack.pop || 1
-		@stack<<a*b
+		b = @stack[@stack_index].pop || 1
+		@stack[@stack_index]<<a*b
 	end
 	
 	def mult_by_100
 		a = 100
-		b = @stack.pop || 1
-		@stack<<a*b
+		b = @stack[@stack_index].pop || 1
+		@stack[@stack_index]<<a*b
 	end
 	
 	#addition
 	def add
-		a = @stack.pop || 0
-		b = @stack.pop || 1
-		@stack<< a+b
+		a = @stack[@stack_index].pop || 0
+		b = @stack[@stack_index].pop || 1
+		@stack[@stack_index]<< b+a
 	end
 
 	#multiply - Technically works for strings (Lets call it a easter egg)
 	def mult
-		a = @stack.pop || 0
-		b = @stack.pop || 1
-		@stack<< a*b
+		a = @stack[@stack_index].pop || 0
+		b = @stack[@stack_index].pop || 1
+		@stack[@stack_index]<< a*b
 	end
 
 	#division
 	def div
-		a = @stack.pop || 0
-		b = @stack.pop || 1
-		@stack<< b/a
+		a = @stack[@stack_index].pop || 0
+		b = @stack[@stack_index].pop || 1
+		@stack[@stack_index]<< b/a
 	end
 	
 	#subtraction
 	def sub
-		a = @stack.pop || 0
-		b = @stack.pop || 1 
-		@stack<< a-b
+		a = @stack[@stack_index].pop || 0
+		b = @stack[@stack_index].pop || 1 
+		@stack[@stack_index]<< a-b
 	end
 	
 	def mod
-		a = @stack.pop || 1
-		b = @stack.pop || 2
-		@stack<< b%a
+		a = @stack[@stack_index].pop || 1
+		b = @stack[@stack_index].pop || 2
+		@stack[@stack_index]<< b%a
 		
 	end
 	
 	# Power of
 	def pow
-		a = @stack.pop || 0
-		b = @stack.pop || 0
-		@stack<< b**a
+		a = @stack[@stack_index].pop || 0
+		b = @stack[@stack_index].pop || 0
+		@stack[@stack_index]<< b**a
 	end
 	
 	# Negate
 	def neg
-		a = @stack.pop || 1
-		@stack<< a*-1
+		a = @stack[@stack_index].pop || 1
+		@stack[@stack_index]<< a*-1
 	end
 	
 #############
@@ -226,37 +245,50 @@ class MadHatter
 
 	# Most useful here probably
 	def string_length
-		a = @stack.pop
-		@stack<< a.to_s.length
+		a = @stack[@stack_index].pop
+		@stack[@stack_index]<< a.to_s.length
+	end
+	
+	def string_from_int
+		a = @stack[@stack_index].pop.to_s
+		@stack[@stack_index]<< a
 	end
 	
 	# Hacky
 	def string_regex
-		a = @stack.pop.to_s
-		b = @stack.pop.to_s
+		a = @stack[@stack_index].pop.to_s
+		b = @stack[@stack_index].pop.to_s
 		#p a, b
 		#arr = a.scan(/#{b}/)
 		#p arr
-		@stack<< a.scan(/#{b}/)[0]
+		@stack[@stack_index]<< b.scan(/#{a}/)[0]
 	end
 	
 	# Very useful for fake arrays
 	def string_chars
-		a = @stack.pop.to_s
+		a = @stack[@stack_index].pop.to_s
 		a.chars.each{|x|
 	
 	
-			@stack<< x
+			@stack[@stack_index]<< x
 		}
 	
 	end
 	
+	# Reverse string
+	def string_reverse
+		a = @stack[@stack_index].pop.to_s
+		@stack[@stack_index]<< a.reverse
+	end
+	
 	# Also very useful
 	def string_split
-		a = @stack.pop.to_s 
-		b = @stack.pop.to_s || "\s"
-		a.split(/#{b}/).each{|x|
-			@stack<< x
+		a = @stack[@stack_index].pop.to_s 
+		b = @stack[@stack_index].pop.to_s
+		
+		#p b
+		b.split(/#{a}/).each{|x|
+			@stack[@stack_index]<< x
 		}
 		
 		
@@ -264,7 +296,7 @@ class MadHatter
 	end
 	
 	def string_empty
-		@stack<< ""
+		@stack[@stack_index]<< ""
 	
 	end
 	
@@ -272,38 +304,68 @@ class MadHatter
 ####Stack####
 #############
 
+	def stack_right
+		@stack_index += 1
+		@stack<< [] if @stack_index>@stack.length-1
+	end
+	
+	def stack_left
+		@stack_index -= 1
+		if @stack_index<0
+			@stack.unshift([]) 
+			@stack_index = 0
+		end
+	end
+	
+	def push_right
+		a = @stack[@stack_index].pop
+		@stack_index += 1
+		@stack<< [] if @stack_index>@stack.length-1
+		@stack[@stack_index]<< a
+	end
+	
+	def push_left
+		a = @stack[@stack_index].pop
+		@stack_index -= 1
+		if @stack_index<0
+			@stack.unshift([]) 
+			@stack_index = 0
+		end
+		@stack[@stack_index]<< a
+	end
+	
 	def copy
-		a = @stack.pop || 0
-		@stack<< a
-		@stack<< a
+		a = @stack[@stack_index].pop || 0
+		@stack[@stack_index]<< a
+		@stack[@stack_index]<< a
 	end
 	
 	def reverse
-		@stack = @stack.reverse
+		@stack[@stack_index] = @stack[@stack_index].reverse
 	end
 	
 	def swap
-		a = @stack.pop || 1
-		b = @stack.pop || 0
+		a = @stack[@stack_index].pop || 1
+		b = @stack[@stack_index].pop || 0
 		
-		@stack<< a
-		@stack<< b
+		@stack[@stack_index]<< a
+		@stack[@stack_index]<< b
 	end
 	
 	def discard
-		@stack.pop
+		@stack[@stack_index].pop
 	end
 	
 	def depth
-		@stack<< @stack.size
+		@stack[@stack_index]<< @stack[@stack_index].size
 	end
 	
 	def move_end
-		@stack<< @stack.shift
+		@stack[@stack_index]<< @stack[@stack_index].shift
 	end
 	
 	def move_front
-		@stack.unshift(@stack.pop)
+		@stack[@stack_index].unshift(@stack[@stack_index].pop)
 	end
 
 #############
@@ -311,36 +373,45 @@ class MadHatter
 #############
 
 	def jump
-		a = @stack.pop || -1
-		b = @stack.pop || 0
+		a = @stack[@stack_index].pop || 0
+		b = @stack[@stack_index].pop || -1
 		#puts a, b
-		@ip[:x] = a
-		@ip[:y] = b
+		@ip[:x] = b
+		@ip[:y] = a
 	end
 	
-	#do next if
+	#do next if, with error handling, in case we want to compare strings and digits
 	
 	def greater
-		a = @stack.pop || 0
-		b = @stack.pop || 0
-		
-		move() if not b>a
+		a = @stack[@stack_index].pop || 0
+		b = @stack[@stack_index].pop || 0
+		begin
+			move() if not b>a
+		rescue
+			move()
+		end
 	
 	end
 	
 	def less
-		a = @stack.pop || 0
-		b = @stack.pop || 0
-		
-		move() if not b>a
+		a = @stack[@stack_index].pop || 0
+		b = @stack[@stack_index].pop || 0
+		begin
+			move() if not b>a
+		rescue
+			move()
+		end
 	end
 	
 	def equal
 	
-		a = @stack.pop || 0
-		b = @stack.pop || 1
-		
-		move() if not a==b
+		a = @stack[@stack_index].pop || 0
+		b = @stack[@stack_index].pop || 1
+		begin
+			move() if not a==b
+		rescue
+			move()
+		end
 	end
 	
 	
@@ -348,7 +419,7 @@ class MadHatter
 	
 	def repeat
 		move()
-		a = @stack.pop || 0
+		a = @stack[@stack_index].pop || 0
 		a.times{|x|
 			#p x
 			@commands[@grid[@ip[:y]][@ip[:x]]].call()
@@ -366,19 +437,19 @@ class MadHatter
 		#p x
 		
 		begin
-			@stack<< x.to_i
+			@stack[@stack_index]<< x.to_i
 		rescue
-			@stack<< x
+			@stack[@stack_index]<< x
 		end
 	end
 	
 	def input_string
 		x = gets.chomp
-		@stack<< x
+		@stack[@stack_index]<< x
 	end
 	
 	def output
-		$><< @stack.pop
+		$><< @stack[@stack_index].pop
 	end
 	
 	def newline
@@ -392,7 +463,7 @@ class MadHatter
 #############
 	
 	def debug
-		print @stack,$/, @grid,$/, @ip
+		print @stack,$/, @grid,$/, @ip,$/
 	
 	end
 	
@@ -400,18 +471,18 @@ class MadHatter
 			
 			
 			@ip[:x] += 1
-			#@stack<< 0 if @stack.length<1
-			#puts @stack
+			#@stack[@stack_index]<< 0 if @stack[@stack_index].length<1
+			#puts @stack[@stack_index]
 			if @ip[:x] > @grid_length-1
 				value = 0
 				begin
-					value = @stack[-1].to_i
+					value = @stack[@stack_index][-1].to_i
 				rescue
-					value = @stack[-1].length
+					value = @stack[@stack_index][-1].length
 				end
 				
-				@ip[:y] += 1 if @stack[-1]==nil || value > 0
-				@ip[:y] -= 1 if @stack[-1] && value <= 0
+				@ip[:y] += 1 if @stack[@stack_index][-1]==nil || value > 0
+				@ip[:y] -= 1 if @stack[@stack_index][-1] && value <= 0
 				@ip[:x] = 0
 				
 			
@@ -434,7 +505,7 @@ class MadHatter
 				
 			# Number handeling
 			elsif @grid[@ip[:y]][@ip[:x]] =~ /[[:digit:]]/
-				@stack<< @grid[@ip[:y]][@ip[:x]].to_i
+				@stack[@stack_index]<< @grid[@ip[:y]][@ip[:x]].to_i
 			# String handeling
 			elsif @grid[@ip[:y]][@ip[:x]] == "'"
 				@buffer = ""
@@ -445,7 +516,7 @@ class MadHatter
 					move()
 					
 				end
-				@stack<< @buffer
+				@stack[@stack_index]<< @buffer
 			elsif @grid[@ip[:y]][@ip[:x]] == '"'
 				@buffer = ""
 				move()
@@ -455,7 +526,7 @@ class MadHatter
 					move()
 					
 				end
-				@stack<< @buffer
+				@stack[@stack_index]<< @buffer
 			end
 		end
 	end
