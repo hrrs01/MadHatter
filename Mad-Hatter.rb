@@ -84,23 +84,54 @@ class MadHatter
 			},
 			"D"=>Proc.new{
 				debug()
+			},
+			"I"=>Proc.new{
+				input_string()
+			},
+			"S"=>Proc.new{
+				string_split()
+			},
+			">"=>Proc.new{
+				greater
+			},
+			"<"=>Proc.new{
+				less
+			},
+			"="=>Proc.new{
+				equal
+			},
+			"f"=>Proc.new{
+				move_front
+			},
+			"e"=>Proc.new{
+				move_end
 			}
+			
 			
 		}
 		@queue = []
 		@running = true
 
 		setup $*[0]
+		$*.clear
 
 		run
 	end
 
 	def setup src
-		code = File.open(src, "r").read
+		code = ""
+		File.open(src, "r"){|f|
+			code = f.read
+		}
 		code.each_line{|x|
 			@grid<< x.chars
 		}
-		@grid_length = @grid.max_by(&:length).length
+		
+		begin
+			@grid_length = @grid.max_by(&:length).length
+		rescue
+			puts ""
+		end
 		@grid.each_with_index{|x,i|
 			while x.length < @grid_length
 				@grid[i]<< "."
@@ -200,7 +231,9 @@ class MadHatter
 	def string_regex
 		a = @stack.pop.to_s
 		b = @stack.pop.to_s
-		
+		#p a, b
+		#arr = a.scan(/#{b}/)
+		#p arr
 		@stack<< a.scan(/#{b}/)[0]
 	end
 	
@@ -214,7 +247,19 @@ class MadHatter
 		}
 	
 	end
-
+	
+	# Also very useful
+	def string_split
+		a = @stack.pop.to_s
+		b = @stack.pop.to_s || "\s"
+		a.split(/#{b}/).each{|x|
+			@stack<< x
+		}
+		
+		
+		
+	end
+	
 #############
 ####Stack####
 #############
@@ -244,6 +289,14 @@ class MadHatter
 	def depth
 		@stack<< @stack.size
 	end
+	
+	def move_end
+		@stack<< @stack.shift
+	end
+	
+	def move_front
+		@stack.unshift(@stack.pop)
+	end
 
 #############
 ####Logic####
@@ -252,9 +305,38 @@ class MadHatter
 	def jump
 		a = @stack.pop || -1
 		b = @stack.pop || 0
-		@ip[:x] = a-1
+		#puts a, b
+		@ip[:x] = a
 		@ip[:y] = b
 	end
+	
+	#do next if
+	
+	def greater
+		a = @stack.pop || 0
+		b = @stack.pop || 0
+		
+		move() if not a>b
+	
+	end
+	
+	def less
+		a = @stack.pop || 0
+		b = @stack.pop || 0
+		
+		move() if not a>b
+	end
+	
+	def equal
+	
+		a = @stack.pop || 0
+		b = @stack.pop || 1
+		
+		move() if not a==b
+	end
+	
+	
+	#repeat x times
 	
 	def repeat
 		move()
@@ -271,12 +353,20 @@ class MadHatter
 ##################
 
 	def input
+		
 		x = gets.chomp
+		#p x
+		
 		begin
 			@stack<< x.to_i
 		rescue
 			@stack<< x
 		end
+	end
+	
+	def input_string
+		x = gets.chomp
+		@stack<< x
 	end
 	
 	def output
@@ -299,8 +389,8 @@ class MadHatter
 	end
 	
 	def move
-			#print @ip
-			#print @oldPos
+			
+			
 			@ip[:x] += 1
 			#@stack<< 0 if @stack.length<1
 			#puts @stack
@@ -315,10 +405,10 @@ class MadHatter
 				@ip[:y] += 1 if @stack[-1]==nil || value > 0
 				@ip[:y] -= 1 if @stack[-1] && value <= 0
 				@ip[:x] = 0
-				@running = false if @ip[:y] > @grid.length-1 ||  @ip[:y]<0
+				
 			
 			end
-			
+			@running = false if @ip[:y] > @grid.length-1 ||  @ip[:y]<0
 			#print @ip
 			
 	end
@@ -348,6 +438,16 @@ class MadHatter
 					
 				end
 				@stack<< @buffer
+			elsif @grid[@ip[:y]][@ip[:x]] == '"'
+				@buffer = ""
+				move()
+				while @grid[@ip[:y]][@ip[:x]] != '"'
+					
+					@buffer<< @grid[@ip[:y]][@ip[:x]]
+					move()
+					
+				end
+				@stack<< @buffer
 			end
 		end
 	end
@@ -355,4 +455,3 @@ class MadHatter
 end
 
 mad = MadHatter.new
-
