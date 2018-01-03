@@ -187,7 +187,7 @@ class MadHatter
 	def div
 		a = @stack.pop || 0
 		b = @stack.pop || 1
-		@stack<< a/b
+		@stack<< b/a
 	end
 	
 	#subtraction
@@ -200,7 +200,7 @@ class MadHatter
 	def mod
 		a = @stack.pop || 1
 		b = @stack.pop || 2
-		@stack<< a%b
+		@stack<< b%a
 		
 	end
 	
@@ -208,7 +208,7 @@ class MadHatter
 	def pow
 		a = @stack.pop || 0
 		b = @stack.pop || 0
-		@stack<< a**b
+		@stack<< b**a
 	end
 	
 	# Negate
@@ -234,7 +234,7 @@ class MadHatter
 		#p a, b
 		#arr = a.scan(/#{b}/)
 		#p arr
-		@stack<< a.scan(/#{b}/)[0]
+		@stack<< b.scan(/#{a}/)[0]
 	end
 	
 	# Very useful for fake arrays
@@ -250,9 +250,9 @@ class MadHatter
 	
 	# Also very useful
 	def string_split
-		a = @stack.pop.to_s
-		b = @stack.pop.to_s || "\s"
-		a.split(/#{b}/).each{|x|
+		a = @stack.pop.to_s || "\s"
+		b = @stack.pop.to_s 
+		b.split(/#{a}/).each{|x|
 			@stack<< x
 		}
 		
@@ -316,7 +316,7 @@ class MadHatter
 		a = @stack.pop || 0
 		b = @stack.pop || 0
 		
-		move() if not a>b
+		move() if not b>a
 	
 	end
 	
@@ -324,7 +324,7 @@ class MadHatter
 		a = @stack.pop || 0
 		b = @stack.pop || 0
 		
-		move() if not a>b
+		move() if not b>a
 	end
 	
 	def equal
