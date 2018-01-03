@@ -105,6 +105,9 @@ class MadHatter
 			},
 			"e"=>Proc.new{
 				move_end
+			},
+			"E"=>Proc.new{
+				string_empty
 			}
 			
 			
@@ -258,6 +261,11 @@ class MadHatter
 		
 		
 		
+	end
+	
+	def string_empty
+		@stack<< ""
+	
 	end
 	
 #############
