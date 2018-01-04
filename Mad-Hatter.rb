@@ -383,9 +383,9 @@ class MadHatter
 
 	def jump
 		a = @stack[@stack_index].pop || 0
-		b = @stack[@stack_index].pop || -1
+		b = @stack[@stack_index].pop || 0
 		#puts a, b
-		@ip[:x] = b
+		@ip[:x] = b-1
 		@ip[:y] = a
 	end
 	
@@ -480,13 +480,13 @@ class MadHatter
 	def ip_up
 		@ip[:y] -= 1
 		@ip[:y] = @grid.length-1 if @ip[:y]<0
-		@ip[:x] = 0
+		@ip[:x] = -1
 	end
 	
 	def ip_down
 		@ip[:y] += 1
 		@ip[:y] = 0 if @ip[:y] > @grid.length-1
-		@ip[:x] = 0
+		@ip[:x] = -1
 	end
 	
 	def debug
