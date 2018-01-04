@@ -128,12 +128,10 @@ class MadHatter
 			},
 			"X"=>Proc.new{
 				string_from_int
-			}
-			,
+			},
 			"A"=>Proc.new{
 				ip_up
-			}
-			,
+			},
 			"V"=>Proc.new{
 				ip_down
 			},
