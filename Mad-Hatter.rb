@@ -129,6 +129,17 @@ class MadHatter
 			"X"=>Proc.new{
 				string_from_int
 			}
+			,
+			"A"=>Proc.new{
+				ip_up
+			}
+			,
+			"V"=>Proc.new{
+				ip_down
+			},
+			","=>Proc.new{
+				wait
+			}
 			
 			
 		}
@@ -461,6 +472,24 @@ class MadHatter
 #############
 ###Running###
 #############
+	
+	def wait
+		a = @stack[@stack_index].pop.to_i
+		sleep(a)
+	
+	end
+	
+	def ip_up
+		@ip[:y] -= 1
+		@ip[:y] = @grid.length-1 if @ip[:y]<0
+		@ip[:x] = 0
+	end
+	
+	def ip_down
+		@ip[:y] += 1
+		@ip[:y] = 0 if @ip[:y] > @grid.length-1
+		@ip[:x] = 0
+	end
 	
 	def debug
 		print @stack,$/, @grid,$/, @ip,$/
