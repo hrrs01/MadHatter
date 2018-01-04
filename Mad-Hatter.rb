@@ -137,6 +137,9 @@ class MadHatter
 			},
 			","=>Proc.new{
 				wait
+			},
+			"J"=>Proc.new{
+				string_join
 			}
 			
 			
@@ -302,6 +305,15 @@ class MadHatter
 		
 		
 		
+	end
+	
+	# Godlike, acctually
+	def string_join
+		a = @stack[@stack_index].pop.to_s
+		b = @stack[@stack_index].pop.to_i || 2
+		c = @stack[@stack_index][-b, b].join(a)
+		@stack[@stack_index].pop(b)
+		@stack[@stack_index]<< c
 	end
 	
 	def string_empty
