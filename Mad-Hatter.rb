@@ -181,7 +181,7 @@ class MadHatter
 	def char_to_int
 		a = @stack[@stack_index].pop|| 0
 		
-		@stack[@stack_index]<< a.to_s[0].ord
+		@stack[@stack_index]<< a.to_s[0].to_i
 	
 	end
 	
@@ -281,7 +281,7 @@ class MadHatter
 		a = @stack[@stack_index].pop.to_s
 		a.chars.each{|x|
 	
-	
+			
 			@stack[@stack_index]<< x
 		}
 	
